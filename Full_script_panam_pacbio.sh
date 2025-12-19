@@ -63,8 +63,7 @@ seqtk subseq $dirpath/exp/3.OTU_table/quality_output/$i/all18S.fasta $dirpath/ex
 
 cd $dirpath/exp/3.OTU_table/quality_output/
 
-for i in $(ls $dirpath/exp/3.OTU_table/quality_output/ | grep demux); do perl $binpath/seqAll_paul_chimeras.pl $i $amplicons ;
+for i in $(ls $dirpath/exp/3.OTU_table/quality_output/ | grep demux); do perl $binpath/seqAll_pacbio_chimeras.pl $i $amplicons ;
 done
-
 
 cat $dirpath/exp/3.OTU_table/quality_output/demux*/*.final.fasta > $dirpath/exp/3.OTU_table/quality_output/seqAll.fasta
