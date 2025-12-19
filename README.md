@@ -4,16 +4,16 @@ https://github.com/panammeb/PANAM2
 
 **These script are part of the preprocessing of reads for the PANAM2 pipeline**
 
-* Only `Full_script_panam_pacbio.sh` needs to be launch to perform preprocessing. 
+* Only `preprocess_panam_pacbio.sh` needs to be launch to perform preprocessing. 
 
 * An example of command line :
 
 ```
-nohup bash Full_script_panam_pacbio.sh -w <BIN_PACBIO_FOLDER> -x <WORKING_DIRECTORY> -y <RAW_READS_FOLDER> -z <AMPLICONS_file.txt> &> nohup.preprocessing_panam_pacbio.out &
+nohup bash preprocess_panam_pacbio.sh -w <BIN_PACBIO_FOLDER> -x <WORKING_DIRECTORY> -y <RAW_READS_FOLDER> -z <AMPLICONS_file.txt> &> nohup.preprocessing_panam_pacbio.out &
 ```
 
 	
-* A brief description of `Full_script_panam_pacbio.sh` parameters :
+* A brief description of `preprocess_panam_pacbio.sh` parameters :
 
 	+ -w <BIN_FOLDER> : path to the scripts
 	+ -x <WORKING_DIRECTORY> : path to the folder where all results and intermediate files will be stored

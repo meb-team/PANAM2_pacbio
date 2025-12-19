@@ -3,10 +3,10 @@
 helpFunction()
 {
    echo ""
-   echo "Usage: $0 -w binpath -x dirpath -y bamdir -z amplicons"
+   echo "Usage: $0 -w binpath -x dirpath -y rawreads -z amplicons"
    echo -e "\t-w Full path to bin folder containing scripts"
    echo -e "\t-x Full path to working directory"
-   echo -e "\t-y Full path to bam folder"
+   echo -e "\t-y Full path to raw reads folder"
    echo -e "\t-z Full path to AMPLICONS file"
    exit 1 # Exit script after printing help
 }
@@ -16,14 +16,14 @@ do
    case "$opt" in
       w ) binpath="$OPTARG" ;;
       x ) dirpath="$OPTARG" ;;
-      y ) bamdir="$OPTARG" ;;
+      y ) rawreads="$OPTARG" ;;
       z ) amplicons="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
 
 # Print helpFunction in case parameters are empty
-if [ -z "$binpath" ] || [ -z "$dirpath" ] || [ -z "$bamdir" ] || [ -z "$amplicons" ]
+if [ -z "$binpath" ] || [ -z "$dirpath" ] || [ -z "$rawreads" ] || [ -z "$amplicons" ]
 then
    echo "Some or all of the parameters are empty";
    helpFunction
@@ -32,7 +32,7 @@ fi
 #Begin script in case all parameters are correct
 echo "$binpath"
 echo "$dirpath"
-echo "$bamdir"
+echo "$rawreads"
 echo "$amplicons"
 
 
@@ -40,7 +40,7 @@ mkdir -p $dirpath/exp/1.rawReads_Filtering
 mkdir -p $dirpath/exp/2.SSU-LSU_Extraction/
 mkdir -p $dirpath/exp/3.OTU_table/quality_output
 
-bash $binpath/rawReads_filtering.sh $dirpath/exp/1.rawReads_Filtering $bamdir $binpath
+bash $binpath/rawReads_filtering.sh $dirpath/exp/1.rawReads_Filtering $rawreads $binpath
 
 
 ### need to create 2.SSU-LSU_Extraction/ dir
