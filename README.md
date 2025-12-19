@@ -4,22 +4,23 @@ https://github.com/panammeb/PANAM2
 
 **These script are part of the preprocessing of reads for the PANAM2 pipeline**
 
-* Only the `Full_script_panam_pacbio.sh` script needs to be launch to perform preprocessing. 
+* Only `Full_script_panam_pacbio.sh` needs to be launch to perform preprocessing. 
 
 * An example of command line :
 
 ```
-nohup bash Full_script_panam_pacbio.sh -w <BIN_FOLDER> -x <WORKING_DIRECTORY> -y <RAW_READS_FOLDER> -z <AMPLICONS_file.txt> &> nohup.preprocessing_panam_pacbio.out &
+nohup bash Full_script_panam_pacbio.sh -w <BIN_PACBIO_FOLDER> -x <WORKING_DIRECTORY> -y <RAW_READS_FOLDER> -z <AMPLICONS_file.txt> &> nohup.preprocessing_panam_pacbio.out &
 ```
+
 	
 * A brief description of `Full_script_panam_pacbio.sh` parameters :
 
 	+ -w <BIN_FOLDER> : path to the scripts
-	+ -x <WORKING_DIRECTORY> : path to the folder where all results and intermediate file will be stored
+	+ -x <WORKING_DIRECTORY> : path to the folder where all results and intermediate files will be stored
 	+ -y <RAW_READS_FOLDER> : path to the raw fastq reads
 	+ -z <AMPLICONS_file.txt> : path to the amplicons file (one "samplename\tsampleOrigin" per line)
 
-Example of a amplicons content :
+Example of an amplicons file content :
 
 ```
 sample	sampleOrigin
