@@ -1,0 +1,158 @@
+---
+title: "Comparaison_V4_SR_LR"
+author: "Paul Terzian"
+date: "2026-03-27"
+output: html_document
+---
+
+
+In this study we clustered the seq seed of V4SR filtered with the 0.005 Bokulich filter (OTU with abund > 66) with the full seq seed of extracted V4 from full18S LR.
+Here we compared the abundances of OTUs in SR-only and mix clusters.
+
+
+```{r setup, include=FALSE}
+library(data.table)
+library(ggplot2)
+library(stringr)
+library(stringi)
+library(coin)
+```
+
+### Load tables & keep only useful column
+```{r}
+### nb OTU in below table is less than the total number of OTU produced by clustering because some those OTU were filtered during PANAM2's taxonomic affiliation
+OTU_SR_LR <-  fread(input = "OTU_0.97_list_longformat_bokulich_0.005_extractedsacch.txt", stringsAsFactors = F, sep = "\t", col.names = "OTU", header = F)
+
+OTU_list_metazoa <-  fread(input = "OTU_list_metazoa.txt", stringsAsFactors = F, sep = "\t", col.names = , header = F)
+
+OTU_V4_SR <- fread(input = "OTU_distribution_tax_V4_SR_marina.txt", stringsAsFactors = F, sep = "\t")
+
+OTU_V4_LR <- fread(input = "../Comparaison_LR_SR_V4/OTU_distribution_tax_Full18S_97_LR.txt", stringsAsFactors = F, sep = "\t")
+
+db_taxo_SR <- OTU_V4_SR[,c(1,2,41,42,43,44)]
+db_taxo_LR <- OTU_V4_LR[,c(1,2,41,42,43,44)]
+db_taxo_LR$OTU_Id <- str_replace(db_taxo_LR$OTU_Id, pattern = "_LR$", "")
+
+################## SR bokulich filter
+db_abund_SR <- OTU_V4_SR[,!(c(1,2,41,42,43,44))]
+db_abund_SR_id <- OTU_V4_SR[,!(c(2,41,42,43,44))]
+
+
+db_abund_LR <- OTU_V4_LR[,!(c(1,2,41,42,43,44))]
+db_abund_LR_id <- OTU_V4_LR[,!(c(2,41,42,43,44))]
+```
+
+### First identify which cluster are only SR or LR ## get ratio
+```{r}
+lrez <- lapply(OTU_SR_LR$OTU, function(x){
+  
+  cur_OTU <- unlist(str_split(x, pattern = ","))
+  nbLR <- sum(str_count(cur_OTU, "LR"))
+  nbSR <- sum(str_count(cur_OTU, "SR"))
+  ratio <- nbLR/(nbLR+nbSR)*100
+  cluststatus <- ifelse(test = (ratio == 100), yes = "FullLR", no = ifelse(ratio == 0, yes = "FullSR", no = "Mixed"))
+  
+  return(data.table(nbLR = nbLR, nbSR = nbSR, ratioLRSR = ratio, status = cluststatus))
+  
+})
+ratiotable <- do.call(rbind, lrez)
+ratiotable$OTU <- 1:nrow(ratiotable)
+ratiotable[, sums := nbLR +  nbSR]
+
+## Plot before removing singletons
+hist_clusters <- ggplot(data = ratiotable, mapping = aes(x = status)) +
+  geom_bar() +
+  geom_text(stat='count', aes(label=..count..), vjust=0)
+hist_clusters
+
+```
+
+## Find taxonomy for FullSR 
+```{r}
+# nosingletonsTable <- ratiotable[sums > 1]
+# ES-ce qu'on garde que les clusters singletons ?
+
+fullSR_otus <- OTU_SR_LR[ratiotable[status == "FullSR"]$OTU]
+
+fullLR_otus <- OTU_SR_LR[ratiotable[status == "FullLR"]$OTU]
+
+otu_LR_list <- str_replace(unlist(strsplit(fullLR_otus$OTU, ",")), pattern = "_LR", "")
+
+fullmixed_otus <- OTU_SR_LR[ratiotable[status == "Mixed"]$OTU]
+```
+
+
+#### Clean annotation from unwanted strings
+```{r}
+toremove_tax <- c("environmental samples;","unclassified.+;(.+)?")
+
+db_taxo_SR$`LCA taxonomy` <- str_remove_all(string = db_taxo_SR$`LCA taxonomy`, pattern = toremove_tax[1])
+db_taxo_SR$`LCA taxonomy` <- str_remove_all(string = db_taxo_SR$`LCA taxonomy`, pattern = toremove_tax[2])
+
+db_taxo_LR$`LCA taxonomy` <- str_remove_all(string = db_taxo_LR$`LCA taxonomy`, pattern = toremove_tax[1])
+db_taxo_LR$`LCA taxonomy` <- str_remove_all(string = db_taxo_LR$`LCA taxonomy`, pattern = toremove_tax[2])
+```
+
+
+## Find unique longest taxonomic affiliations in full SR clusters
+```{r}
+otu_SR_list <- str_replace(unlist(strsplit(fullSR_otus$OTU, split = ",")), pattern = "_SR", "")
+
+only_SR_taxo <- db_taxo_SR[OTU_Id %in% otu_SR_list]
+uniq_timmed_taxo <- str_replace(unique(only_SR_taxo$`LCA taxonomy`), " ;", "")
+
+unique_taxa_SR <- data.table(taxoref = uniq_timmed_taxo)
+```
+
+
+## Find unique longest taxonomic affiliations in Mixed clusters
+```{r}
+otu_mixed_list <- unlist(strsplit(fullmixed_otus$OTU, split = ","))
+
+otu_mixed_list_SR <- str_replace(otu_mixed_list[grepl("SR", otu_mixed_list)], pattern =  "_SR", "")
+otu_mixed_list_LR <- str_replace(otu_mixed_list[grepl("LR", otu_mixed_list)], pattern = "_LR", "")
+
+only_mixed_taxo_SR <- db_taxo_SR[OTU_Id %in% otu_mixed_list_SR]
+only_mixed_taxo_LR <- db_taxo_LR[OTU_Id %in% otu_mixed_list_LR]
+
+only_abund_taxo_SR <- db_abund_SR_id[OTU_Id %in% otu_mixed_list_SR]
+only_abund_taxo_SR_fullSR <- db_abund_SR_id[OTU_Id %in% otu_SR_list]
+
+
+only_abund_taxo_LR_mixed <- db_abund_LR_id[OTU_Id %in% otu_mixed_list_LR]
+only_abund_taxo_LR_fullLR <- db_abund_LR_id[OTU_Id %in% otu_LR_list]
+
+missingfullSRinOTUtable <- otu_SR_list[which(!otu_SR_list %in% db_abund_SR_id$OTU_Id)]
+
+only_mixed_taxo <- rbind(only_mixed_taxo_SR, only_mixed_taxo_LR)
+
+uniq_timmed_taxo <- str_replace(unique(only_mixed_taxo$`LCA taxonomy`), " ;", "")
+
+unique_taxa_mixed <- data.table(taxoref = uniq_timmed_taxo)
+```
+
+
+## Plot the whole distribution
+```{r}
+sumrow_mixed <- rowSums(only_abund_taxo_SR[,!1])
+sumrow_fullSR <- rowSums(only_abund_taxo_SR_fullSR[,!1])
+
+thetable <- data.table(c(only_abund_taxo_SR$OTU_Id, only_abund_taxo_SR_fullSR$OTU_Id), c(sumrow_mixed, sumrow_fullSR), c(rep("mixed", nrow(only_abund_taxo_SR)), rep("Full_SR", nrow(only_abund_taxo_SR_fullSR))))
+colnames(thetable) <- c("OTU_id", "abundance", "type")
+
+thetable_ordered <- thetable[order(-abundance)]
+
+test <- wilcox.test(abundance ~ type, data = thetable_ordered)
+
+hist_colored_log10 <- ggplot(thetable_ordered, aes(x = reorder(OTU_id, -abundance),y=abundance, fill = type)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values=c("#914e50","#b4c1c8")) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  scale_y_log10() + ggtitle(paste("Clusters of OTU sorted by abundance", test$p.value))
+
+thetable_ordered[type == "mixed", mean(abundance)]
+thetable_ordered[type == "Full_SR", mean(abundance)]
+```
+
