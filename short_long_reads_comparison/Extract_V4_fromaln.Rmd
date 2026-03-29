@@ -5,7 +5,8 @@ date: "2026-03-27"
 output: html_document
 ---
 
-* This script was design to perform the *V4 extraction from long-reads and clustering with short-reads* step described in the study : **Profiling the eukaryotic diversity over a year in a lake ecosystem through short and long-reads metabarcoding approaches**
+
+* This script was design to perform the V4 extraction from 18S sequences, as part of the analysis described in *Profiling the eukaryotic diversity over a year in a lake ecosystem through short- and long-read metabarcoding*.
 
 * It take as input the output of the mothur clustering command line and output the V4 regions.
 

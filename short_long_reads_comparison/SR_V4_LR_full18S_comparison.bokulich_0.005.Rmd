@@ -6,8 +6,7 @@ output: html_document
 ---
 
 
-In this study we clustered the seq seed of V4SR filtered with the 0.005 Bokulich filter (OTU with abund > 66) with the full seq seed of extracted V4 from full18S LR.
-Here we compared the abundances of OTUs in SR-only and mix clusters.
+This script compares the abundance and taxonomic affiliations of OTUs across SR-only and mixed clusters, as part of the analysis described in *Profiling the eukaryotic diversity over a year in a lake ecosystem through short- and long-read metabarcoding*.
 
 
 ```{r setup, include=FALSE}
